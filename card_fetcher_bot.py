@@ -5,7 +5,7 @@ import logging
 import requests
 import configparser
 from telegram import MessageEntity, Update
-from telegram.ext import Updater, CallbackContext, CommandHandler
+from telegram.ext import Updater, CallbackContext
 from telegram.ext import MessageHandler, Filters
 
 # define logging
