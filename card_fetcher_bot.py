@@ -18,29 +18,32 @@ config = configparser.ConfigParser()
 config.read("config.ini")
 
 telegram_token = config["telegram"]["token"]
+API_URL = "https://api.scryfall.com/cards/named"
 
 
 def get_magic_card(card_name):
-    API_URL = "https://api.scryfall.com/cards/named"
 
-    payload = {"fuzzy": card_name}
-    if card_name:
+    if card_name and len(card_name) > 0:
+        payload = {"fuzzy": card_name}
         try:
             r = requests.get(API_URL, params=payload)
         except:
             raise
 
-    if r.status_code == 200:
-        card = r.json()
-        answer = card["image_uris"]["normal"]
-    elif r.status_code == 404:
-        if "type" in r.json() and r.json()["type"] == "ambiguous":
-            answer = "Found more than 1 card, please be more specific"
+        if r.status_code == 200:
+            card = r.json()
+            answer = card["image_uris"]["normal"]
+        elif r.status_code == 404:
+            if "type" in r.json() and r.json()["type"] == "ambiguous":
+                answer = "Found more than 1 card, please be more specific"
+            else:
+                answer = "No matching card found. Try again"
         else:
-            answer = "No card found. Try again"
+            # something strange happened
+            answer = "whoopsie"
     else:
-        # something strange happened
-        answer = "whoopsie"
+        answer = "Got an empty message"
+
     return answer
 
 
