@@ -8,25 +8,30 @@ from telegram import MessageEntity, Update
 from telegram.ext import Updater, CallbackContext
 from telegram.ext import MessageHandler, Filters
 
-# define logging
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
-
 
 config = configparser.ConfigParser()
 config.read("config.ini")
 
 telegram_token = config["telegram"]["token"]
-API_URL = "https://api.scryfall.com/cards/named"
+logfile = config["logging"]["logfile"]
+api_url = config["api"]["url"]
+
+# define logging
+logging.basicConfig(
+    filename=logfile,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO
+)
 
 
-def get_magic_card(card_name):
-
-    if card_name and len(card_name) > 0:
-        payload = {"fuzzy": card_name}
+def get_magic_card(cardname):
+    logging.debug(f"Cardname to search for: {cardname}")
+    if cardname and len(cardname) > 0:
+        payload = {"fuzzy": cardname}
+        logging.debug(f"API payload: {payload}")
         try:
-            r = requests.get(API_URL, params=payload)
+            r = requests.get(api_url, params=payload)
+            logging.debug(f"Response: {r.text}")
         except:
             raise
 
@@ -37,9 +42,9 @@ def get_magic_card(card_name):
             if "type" in r.json() and r.json()["type"] == "ambiguous":
                 answer = "Found more than 1 card, please be more specific"
             else:
-                answer = "No matching card found. Try again"
+                answer = f"No matching card for '{cardname}' found. Try again"
         else:
-            # something strange happened
+            logging.error(r.text)
             answer = "whoopsie"
     else:
         answer = "Got an empty message"
@@ -49,9 +54,11 @@ def get_magic_card(card_name):
 
 # try to find magic cards when mentioned
 def fetch_card(update: Update, context: CallbackContext):
+    logging.debug(f"Bot name: {context.bot.name}")
+    logging.debug(f"Message text: {update.message.text}")
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=get_magic_card(update.message.text.strip(context.bot.name)),
+        text=get_magic_card(update.message.text.replace(context.bot.name, "")),
     )
 
 
