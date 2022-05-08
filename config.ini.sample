@@ -1,2 +1,8 @@
 [telegram]
 token = YOURTOKENHERE
+
+[logging]
+logfile = /PATH/TO/FILE
+
+[api]
+url = https://api.domain.com/
