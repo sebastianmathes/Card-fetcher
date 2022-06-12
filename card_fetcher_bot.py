@@ -67,7 +67,7 @@ def main():
     dispatcher = updater.dispatcher
 
     card_handler = MessageHandler(
-        Filters.text & Filters.entity(MessageEntity.MENTION), fetch_card
+        Filters.text & Filters.entity(MessageEntity.MENTION) & Filters.regex(updater.bot.name), fetch_card
     )
     dispatcher.add_handler(card_handler)
 
