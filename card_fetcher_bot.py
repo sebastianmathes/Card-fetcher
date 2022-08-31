@@ -53,7 +53,7 @@ def get_magic_card(cardname):
 
 
 # try to find magic cards when mentioned in groups
-def fetch_card(update: Update, context: CallbackContext):
+def fetch_from_group(update: Update, context: CallbackContext):
     logging.debug(f"Bot name: {context.bot.name}")
     logging.debug(f"Message text: {update.message.text}")
     context.bot.send_message(
@@ -61,8 +61,9 @@ def fetch_card(update: Update, context: CallbackContext):
         text=get_magic_card(update.message.text.replace(context.bot.name, "")),
     )
 
+
 # try to find magic cards when messaged directly
-def fetch_dm_card(update: Update, context: CallbackContext):
+def fetch_from_dm(update: Update, context: CallbackContext):
     logging.debug(f"Bot name: {context.bot.name}")
     logging.debug(f"Direct Message text: {update.message.text}")
     context.bot.send_message(
@@ -77,15 +78,15 @@ def main():
 
     # define and add handler for groups
     group_handler = MessageHandler(
-        Filters.text & Filters.entity(MessageEntity.MENTION) & Filters.regex(updater.bot.name), fetch_card
+        Filters.text
+        & Filters.entity(MessageEntity.MENTION)
+        & Filters.regex(updater.bot.name),
+        fetch_from_group,
     )
     dispatcher.add_handler(group_handler)
 
-
     # define and add handler for direct messages
-    direct_message_handler = MessageHandler(
-        Filters.chat_type.private, fetch_dm_card
-    )
+    direct_message_handler = MessageHandler(Filters.chat_type.private, fetch_from_dm)
     dispatcher.add_handler(direct_message_handler)
 
     # fire it up
